@@ -1,4 +1,6 @@
-from django.db import models
+from django.db      import models
+
+from coupons.models import Coupon
 
 class Member(models.Model):
     name         = models.CharField(max_length=200)
@@ -7,7 +9,7 @@ class Member(models.Model):
     phone_number = models.CharField(max_length=200)
     address      = models.CharField(max_length=200, null=True)
     recommender  = models.ForeignKey("self", on_delete=models.SET_NULL, null=True)
-    coupon       = models.IntegerField(null=True)
+    coupon       = models.ManyToManyField(Coupon, null=True)
 
     class Meta:
         db_table = 'members'

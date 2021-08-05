@@ -10,31 +10,25 @@ class ProductView(View):
         catalogs = []
 
         if filter == "brand":
-            brands = Brand.objects.all()
-
-            id = id if id else brands[0].id
-
+            brands   = Brand.objects.all()
+            id       = id if id else brands[0].id
             products = Product.objects.filter(brand=id)
 
-            for brand in brands:
-                catalogs.append({
+            catalogs = [{
                     "id"    : brand.id,
                     "name"  : brand.name,
                     "image" : brand.image
-                })
+                } for brand in brands]
 
         elif filter == "type":
-            types = Type.objects.all()
-
-            id = id if id else types[0].id
-
+            types    = Type.objects.all()
+            id       = id if id else types[0].id
             products = Product.objects.filter(type=id)
 
-            for type in types:
-                catalogs.append({
+            catalogs = [{
                     "id"    : type.id,
                     "name"  : type.name
-                })
+                } for type in types]
 
         elif filter == "best":
             products = Product.objects.all().order_by("-like_number")
@@ -42,14 +36,12 @@ class ProductView(View):
         else:
             products = Product.objects.all()
 
-        items = []
-
-        for product in products:
-            items.append({
+        items = [{
                 "id"          : product.id,
                 "name"        : product.name,
                 "price"       : product.price,
                 "thumbnail"   : product.thumbnail,
                 "like_number" : product.like_number
-            })
-        return JsonResponse({"catalogs": catalogs if catalogs else None, "items":items}, status=200, safe=False)
+            } for product in products]
+
+        return JsonResponse({"catalogs" : catalogs if catalogs else None, "items" : items}, status=200, safe=False)

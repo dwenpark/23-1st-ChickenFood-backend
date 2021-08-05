@@ -5,39 +5,51 @@ from .models        import Brand, Type, Product
 
 class ProductView(View):
     def get(self, request):
-        category = request.GET.get("category")
-        id       = request.GET.get("id", 1)
+        filter   = request.GET.get("filter")
+        id       = request.GET.get("id")
         catalogs = []
 
-        if category == "brand":
+        if filter == "brand":
+            brands = Brand.objects.all()
+
+            id = id if id else brands[0].id
+
             products = Product.objects.filter(brand=id)
-            brands   = Brand.objects.all()
 
             for brand in brands:
                 catalogs.append({
+                    "id"    : brand.id,
                     "name"  : brand.name,
                     "image" : brand.image
                 })
 
-        elif category == "type":
+        elif filter == "type":
+            types = Type.objects.all()
+
+            id = id if id else types[0].id
+
             products = Product.objects.filter(type=id)
-            types    = Type.objects.all()
 
             for type in types:
                 catalogs.append({
-                    "name" : type.name,
-                    "image": type.image
+                    "id"    : type.id,
+                    "name"  : type.name
                 })
 
-        elif category == "best":
-            products = Product.objects.all().order_by("like_number")
+        elif filter == "best":
+            products = Product.objects.all().order_by("-like_number")
 
-        results  = []
+        else:
+            products = Product.objects.all()
+
+        items = []
 
         for product in products:
-            results.append({
-                "name"      : product.name,
-                "price"     : product.price,
-                "thumbnail" : product.thumbnail
+            items.append({
+                "id"          : product.id,
+                "name"        : product.name,
+                "price"       : product.price,
+                "thumbnail"   : product.thumbnail,
+                "like_number" : product.like_number
             })
-        return JsonResponse([catalogs if catalogs else None, results], status=200, safe=False)
+        return JsonResponse({"catalogs": catalogs if catalogs else None, "items":items}, status=200, safe=False)

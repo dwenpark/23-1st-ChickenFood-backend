@@ -1,3 +1,81 @@
-from django.shortcuts import render
+import json
+import re
+import bcrypt
+import jwt
 
-# Create your views here.
+from django.views     import View
+from django.http      import JsonResponse
+from django.db.models import Q
+
+from chickenfood.settings import SECRET_KEY
+from members.models       import Member
+
+class AgreementView(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            
+            if not (data.get('name') and data.get('email') and data.get('password') and data.get('phone_number')):
+                return JsonResponse({"message": "EMPTY_VALUE"}, status=400)
+            
+            data['phone_number'] = data['phone_number'].replace("-", "")
+
+            if not re.match('^(?=.*[a-zA-Z]+).{1,}$', data['name']):
+                return JsonResponse({"message": "INVALID_ID_FORMAT"}, status=400)
+
+            if not re.match('^\w+@\w+\.\w+$', data['email']):
+                return JsonResponse({"message": "INVALID_EMAIL_FORMAT"}, status=400) 
+
+            if not re.match('\S{8,}', data['password']):
+                return JsonResponse({"message": "INVALID_PASSWORD_FORMAT"}, status=400)
+
+            if not re.match('\d{10,11}', data['phone_number']):
+                return JsonResponse({"message": "INVALID_PHONE_NUMBER_FORMAT"}, status=400)
+
+            if Member.objects.filter(Q(name=data['name']) | Q(email=data['email']) | Q(phone_number=data['phone_number'])).exists():
+                return JsonResponse({"message": "EXISTED_MEMBER"}, status=400)
+
+            Member.objects.create(
+                    name         = data['name'],
+                    email        = data['email'],
+                    password     = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+                    phone_number = data['phone_number'],
+                    address      = data.get('address'),
+                    recommender  = data.get('recommender')
+            )
+
+            return JsonResponse({"message": "SUCCESS"}, status=201)
+        except Exception:
+            return JsonResponse({"message": "INVALID_VALUE"}, status=400)
+
+class LoginView(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+
+            if not (data.get('member') and data.get('password')):
+                return JsonResponse({"message": "EMPTY_VALUE"}, status=400)
+            
+            data['member'] = data['member'].replace("-", "")
+            
+            if re.match('^(?=.*[a-zA-Z]+).{1,}$', data['member']):
+                login_name=data['member']
+                login_phone_number=""
+            elif re.match('\d{10,11}', data['member']):
+                login_name=""
+                login_phone_number=data['member']
+            else:
+                login_name=""
+                login_phone_number=""
+
+            if not Member.objects.filter(Q(name=login_name) | Q(phone_number=login_phone_number)).exists():
+                return JsonResponse({"message": "INVALID_USER"}, status=401)
+            
+            if not bcrypt.checkpw(data['password'].encode('utf-8'), Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).password.encode('utf-8')):
+                return JsonResponse({"message": "INVALID_PASSWORD"}, status=401)
+
+            token = jwt.encode({'id': Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).id}, SECRET_KEY, algorithm='HS256')
+
+            return JsonResponse({"message": "SUCCESS", "token": token}, status=200)
+        except Exception:
+            return JsonResponse({"mesage": "INVALID_VALUE"}, status=400)

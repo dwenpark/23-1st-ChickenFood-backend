@@ -20,19 +20,22 @@ class AgreementView(View):
             
             data['phone_number'] = data['phone_number'].replace("-", "")
 
-            if not re.match('^(?=.*[a-zA-Z]+).{1,}$', data['name']):
-                return JsonResponse({"message": "INVALID_ID_FORMAT"}, status=400)
+            if not (re.match('^(?=.*[a-zA-Z]+).{1,}$', data['name']) and
+                        re.match('^\w+@\w+\.\w+$', data['email']) and
+                        re.match('\S{8,}', data['password']) and
+                        re.match('\d{10,11}', data['phone_number'])):
+                return JsonResponse({"message": "INVALID_FORMAT"}, status=400)
+            
+            if data.get('recommender'):
+                if not re.match('^(?=.*[a-zA-Z]+).{1,}$', data['recommender']):
+                    return JsonResponse({"message": "INVALID_FORMAT"}, status=400)
+                else:
+                    if not Member.objects.filter(name=data['recommender']).exists():
+                        return JsonResponse({"message": "INVALID_VALUE"}, status=400)
 
-            if not re.match('^\w+@\w+\.\w+$', data['email']):
-                return JsonResponse({"message": "INVALID_EMAIL_FORMAT"}, status=400) 
-
-            if not re.match('\S{8,}', data['password']):
-                return JsonResponse({"message": "INVALID_PASSWORD_FORMAT"}, status=400)
-
-            if not re.match('\d{10,11}', data['phone_number']):
-                return JsonResponse({"message": "INVALID_PHONE_NUMBER_FORMAT"}, status=400)
-
-            if Member.objects.filter(Q(name=data['name']) | Q(email=data['email']) | Q(phone_number=data['phone_number'])).exists():
+            if (Member.objects.filter(name=data['name']).exists() or
+                    Member.objects.filter(email=data['email']).exists() or
+                    Member.objects.filter(phone_number=data['phone_number']).exists()):
                 return JsonResponse({"message": "EXISTED_MEMBER"}, status=400)
 
             Member.objects.create(
@@ -41,7 +44,7 @@ class AgreementView(View):
                     password     = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
                     phone_number = data['phone_number'],
                     address      = data.get('address'),
-                    recommender  = data.get('recommender')
+                    recommender  = Member.objects.get(name=data['recommender'])
             )
 
             return JsonResponse({"message": "SUCCESS"}, status=201)
@@ -68,12 +71,10 @@ class LoginView(View):
                 login_name=""
                 login_phone_number=""
 
-            if not Member.objects.filter(Q(name=login_name) | Q(phone_number=login_phone_number)).exists():
-                return JsonResponse({"message": "INVALID_USER"}, status=401)
+            if not (Member.objects.filter(Q(name=login_name) | Q(phone_number=login_phone_number)).exists() and
+                    bcrypt.checkpw(data['password'].encode('utf-8'), Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).password.encode('utf-8'))):
+                return JsonResponse({"message": "INVALID_MEMBER"}, status=401)
             
-            if not bcrypt.checkpw(data['password'].encode('utf-8'), Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).password.encode('utf-8')):
-                return JsonResponse({"message": "INVALID_PASSWORD"}, status=401)
-
             token = jwt.encode({'id': Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).id}, SECRET_KEY, algorithm='HS256')
 
             return JsonResponse({"message": "SUCCESS", "token": token}, status=200)

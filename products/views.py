@@ -5,27 +5,27 @@ from .models        import Brand, Type, Product
 
 class BrandView(View):
     def get(self, request):
-        brands = Brand.objects.all()
+        brands  = Brand.objects.all()
 
         catalog = [{
-            "id": brand.id,
-            "name": brand.name,
-            "image": brand.image
+            "id"    : brand.id,
+            "name"  : brand.name,
+            "image" : brand.image
         } for brand in brands]
 
-        return JsonResponse({"catalog": catalog}, status=200, safe=False)
+        return JsonResponse({"catalog": catalog}, status=200)
 
 class TypeView(View):
     def get(self, request):
-        types = Type.objects.all()
+        types   = Type.objects.all()
 
         catalog = [{
-            "id": type.id,
-            "name": type.name,
-            "image": type.image
+            "id"    : type.id,
+            "name"  : type.name,
+            "image" : type.image
         } for type in types]
 
-        return JsonResponse({"catalog": catalog}, status=200, safe=False)
+        return JsonResponse({"catalog": catalog}, status=200)
 
 class ProductView(View):
     def get(self, request):
@@ -58,4 +58,4 @@ class ProductView(View):
                 "like_number" : product.like_number
             } for product in products]
 
-        return JsonResponse({"items" : items}, status=200, safe=False)
+        return JsonResponse({"items" : items}, status=200)

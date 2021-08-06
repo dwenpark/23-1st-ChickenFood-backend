@@ -54,20 +54,11 @@ class SignInView(View):
             if not (data.get('member') or data.get('password')):
                 return JsonResponse({"message": "EMPTY_VALUE"}, status=400)
             
-            data['member'] = data['member'].replace("-", "")
+            member = data['member'].replace("-", "")
             
-            if re.match('^(?=.*[a-zA-Z]+).{1,}$', data['member']):
-                login_name=data['member']
-                login_phone_number=""
-            elif re.match('\d{10,11}', data['member']):
-                login_name=""
-                login_phone_number=data['member']
-            else:
-                login_name=""
-                login_phone_number=""
-
-            if not (Member.objects.filter(Q(name=login_name) | Q(phone_number=login_phone_number)).exists() or
-                    bcrypt.checkpw(data['password'].encode('utf-8'), Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).password.encode('utf-8'))):
+            if not Member.objects.filter(Q(name=member) | Q(phone_number=member)).exists():
+                return JsonResponse({"message": "INVALID_MEMBER"}, status=401)
+            if not bcrypt.checkpw(data['password'].encode('utf-8'), Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).password.encode('utf-8')):
                 return JsonResponse({"message": "INVALID_MEMBER"}, status=401)
             
             token = jwt.encode({'id': Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).id}, SECRET_KEY, algorithm='HS256')

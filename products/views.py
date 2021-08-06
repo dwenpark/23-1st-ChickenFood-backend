@@ -1,11 +1,12 @@
-from django.views   import View
-from django.http    import JsonResponse
+from django.views     import View
+from django.http      import JsonResponse
+from django.db.models import Q
 
-from .models        import Brand, Type, Product
+from .models          import Brand, Type, Product
 
-class BrandView(View):
+class BrandsView(View):
     def get(self, request):
-        brands  = Brand.objects.all()
+        brands  = Brand.objects.all().order_by("id")
 
         catalog = [{
             "id"    : brand.id,
@@ -15,9 +16,9 @@ class BrandView(View):
 
         return JsonResponse({"catalog": catalog}, status=200)
 
-class TypeView(View):
+class TypesView(View):
     def get(self, request):
-        types   = Type.objects.all()
+        types   = Type.objects.all().order_by("id")
 
         catalog = [{
             "id"    : type.id,
@@ -27,28 +28,17 @@ class TypeView(View):
 
         return JsonResponse({"catalog": catalog}, status=200)
 
-class ProductView(View):
+class ProductsView(View):
     def get(self, request):
-        filter   = request.GET.get("filter")
-        id       = request.GET.get("id")
+        brand_id = request.GET.get("brand")
+        type_id  = request.GET.get("type")
+        filter   = request.GET.get("filter", "id")
 
-        if filter == "brand":
-            id       = id if id else Brand.objects.all()[0].id
-            products = Product.objects.filter(brand=id)
-
-        elif filter == "type":
-            id       = id if id else Type.objects.all()[0].id
-            products = Product.objects.filter(type=id)
-
-        elif filter == "best":
-            products = Product.objects.all().order_by("-like_number")
-
-        elif filter == "main":
-            id       = Brand.objects.all()[0].id
-            products = Product.objects.filter(brand=id).order_by("-like_number")
+        if brand_id or type_id:
+            products = Product.objects.filter(Q(brand=brand_id) | Q(type=type_id)).order_by("id")
 
         else:
-            products = Product.objects.all()
+            products = Product.objects.all().order_by("id")
 
         items = [{
                 "id"          : product.id,
@@ -56,6 +46,6 @@ class ProductView(View):
                 "price"       : product.price,
                 "thumbnail"   : product.thumbnail,
                 "like_number" : product.like_number
-            } for product in products]
+            } for product in products.order_by(filter)]
 
         return JsonResponse({"items" : items}, status=200)

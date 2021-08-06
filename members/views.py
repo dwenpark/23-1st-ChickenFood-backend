@@ -30,7 +30,7 @@ class SignUpView(View):
                 if not Member.objects.filter(name=data['recommender']).exists():
                     return JsonResponse({"message": "INVALID_VALUE"}, status=400)
 
-            if Member.objects.filter(Q(name=data['name']) | Q(email=data['email']) | Q('phone_number')).exists():
+            if Member.objects.filter(Q(name=data['name']) | Q(email=data['email']) | Q(phone_number=data['phone_number'])).exists():
                 return JsonResponse({"message": "EXISTED_MEMBER"}, status=400)
 
             Member.objects.create(
@@ -45,3 +45,34 @@ class SignUpView(View):
             return JsonResponse({"message": "SUCCESS"}, status=201)
         except Exception:
             return JsonResponse({"message": "INVALID_VALUE"}, status=400)
+
+class SignInView(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+
+            if not (data.get('member') or data.get('password')):
+                return JsonResponse({"message": "EMPTY_VALUE"}, status=400)
+            
+            data['member'] = data['member'].replace("-", "")
+            
+            if re.match('^(?=.*[a-zA-Z]+).{1,}$', data['member']):
+                login_name=data['member']
+                login_phone_number=""
+            elif re.match('\d{10,11}', data['member']):
+                login_name=""
+                login_phone_number=data['member']
+            else:
+                login_name=""
+                login_phone_number=""
+
+            if not (Member.objects.filter(Q(name=login_name) | Q(phone_number=login_phone_number)).exists() or
+                    bcrypt.checkpw(data['password'].encode('utf-8'), Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).password.encode('utf-8'))):
+                return JsonResponse({"message": "INVALID_MEMBER"}, status=401)
+            
+            token = jwt.encode({'id': Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).id}, SECRET_KEY, algorithm='HS256')
+
+            return JsonResponse({"message": "SUCCESS", "token": token}, status=200)
+        except Exception:
+            return JsonResponse({"mesage": "INVALID_VALUE"}, status=400)
+

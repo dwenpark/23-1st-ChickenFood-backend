@@ -1,6 +1,7 @@
-from django.views     import View
-from django.http      import JsonResponse
-from django.db.models import Q
+from django.views           import View
+from django.http            import JsonResponse
+from django.db.models       import Q
+from django.core.exceptions import FieldError
 
 from .models          import Brand, Type, Product
 
@@ -30,22 +31,33 @@ class TypesView(View):
 
 class ProductsView(View):
     def get(self, request):
-        brand_id = request.GET.get("brand")
-        type_id  = request.GET.get("type")
-        filter   = request.GET.get("filter", "id")
+        try:
+            brand_id = request.GET.get("brand")
+            type_id  = request.GET.get("type")
+            filter   = request.GET.get("filter", "id")
 
-        if brand_id or type_id:
-            products = Product.objects.filter(Q(brand=brand_id) | Q(type=type_id)).order_by("id")
+            q        = Q()
+            if brand_id:
+                q &= Q(brand=brand_id)
 
-        else:
-            products = Product.objects.all().order_by("id")
+            if type_id:
+                q &= Q(type=type_id)
 
-        items = [{
-                "id"          : product.id,
-                "name"        : product.name,
-                "price"       : product.price,
-                "thumbnail"   : product.thumbnail,
-                "like_number" : product.like_number
-            } for product in products.order_by(filter)]
+            product_prefixes = {
+                "best"   : "-like_number",
+                "recent" : "-register_date",
+                "old"    : "register_date",
+                "id"     : "id"
+            }
 
-        return JsonResponse({"items" : items}, status=200)
+            items = [{
+                    "id"          : product.id,
+                    "name"        : product.name,
+                    "price"       : product.price,
+                    "thumbnail"   : product.thumbnail,
+                    "like_number" : product.like_number
+                } for product in Product.objects.filter(q).order_by(product_prefixes[filter])]
+            return JsonResponse({"items" : items if items else "EMPTY"}, status=200)
+
+        except FieldError:
+            return JsonResponse({"RESULT" : "FILTER_ERROR"}, status=404)

@@ -75,4 +75,3 @@ class SignInView(View):
             return JsonResponse({"message": "SUCCESS", "token": token}, status=200)
         except Exception:
             return JsonResponse({"mesage": "INVALID_VALUE"}, status=400)
-

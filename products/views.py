@@ -34,9 +34,10 @@ class ProductsView(View):
         try:
             brand_id = request.GET.get("brand")
             type_id  = request.GET.get("type")
-            filter   = request.GET.get("filter", "id")
+            filter   = request.GET.get("filter")
 
             q        = Q()
+
             if brand_id:
                 q &= Q(brand=brand_id)
 
@@ -46,8 +47,7 @@ class ProductsView(View):
             product_prefixes = {
                 "best"   : "-like_number",
                 "recent" : "-register_date",
-                "old"    : "register_date",
-                "id"     : "id"
+                "old"    : "register_date"
             }
 
             items = [{
@@ -56,8 +56,8 @@ class ProductsView(View):
                     "price"       : product.price,
                     "thumbnail"   : product.thumbnail,
                     "like_number" : product.like_number
-                } for product in Product.objects.filter(q).order_by(product_prefixes[filter])]
-            return JsonResponse({"items" : items if items else "EMPTY"}, status=200)
+                } for product in Product.objects.filter(q).order_by(product_prefixes.get(filter, "id"))]
+            return JsonResponse({"items" : items}, status=200)
 
         except FieldError:
             return JsonResponse({"RESULT" : "FILTER_ERROR"}, status=404)

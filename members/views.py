@@ -10,32 +10,27 @@ from django.db.models import Q
 from chickenfood.settings import SECRET_KEY
 from members.models       import Member
 
-class AgreementView(View):
+class SignUpView(View):
     def post(self, request):
         try:
             data = json.loads(request.body)
             
-            if not (data.get('name') and data.get('email') and data.get('password') and data.get('phone_number')):
+            if not (data.get('name') or data.get('email') or data.get('password') or data.get('phone_number')):
                 return JsonResponse({"message": "EMPTY_VALUE"}, status=400)
             
             data['phone_number'] = data['phone_number'].replace("-", "")
 
-            if not (re.match('^(?=.*[a-zA-Z]+).{1,}$', data['name']) and
-                        re.match('^\w+@\w+\.\w+$', data['email']) and
-                        re.match('\S{8,}', data['password']) and
+            if not (re.match('^(?=.*[a-zA-Z]+).{1,}$', data['name']) or
+                        re.match('^\w+@\w+\.\w+$', data['email']) or
+                        re.match('\S{8,}', data['password']) or
                         re.match('\d{10,11}', data['phone_number'])):
                 return JsonResponse({"message": "INVALID_FORMAT"}, status=400)
             
             if data.get('recommender'):
-                if not re.match('^(?=.*[a-zA-Z]+).{1,}$', data['recommender']):
-                    return JsonResponse({"message": "INVALID_FORMAT"}, status=400)
-                else:
-                    if not Member.objects.filter(name=data['recommender']).exists():
-                        return JsonResponse({"message": "INVALID_VALUE"}, status=400)
+                if not Member.objects.filter(name=data['recommender']).exists():
+                    return JsonResponse({"message": "INVALID_VALUE"}, status=400)
 
-            if (Member.objects.filter(name=data['name']).exists() or
-                    Member.objects.filter(email=data['email']).exists() or
-                    Member.objects.filter(phone_number=data['phone_number']).exists()):
+            if Member.objects.filter(Q(name=data['name']) | Q(email=data['email']) | Q('phone_number')).exists():
                 return JsonResponse({"message": "EXISTED_MEMBER"}, status=400)
 
             Member.objects.create(
@@ -50,33 +45,3 @@ class AgreementView(View):
             return JsonResponse({"message": "SUCCESS"}, status=201)
         except Exception:
             return JsonResponse({"message": "INVALID_VALUE"}, status=400)
-
-class LoginView(View):
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-
-            if not (data.get('member') and data.get('password')):
-                return JsonResponse({"message": "EMPTY_VALUE"}, status=400)
-            
-            data['member'] = data['member'].replace("-", "")
-            
-            if re.match('^(?=.*[a-zA-Z]+).{1,}$', data['member']):
-                login_name=data['member']
-                login_phone_number=""
-            elif re.match('\d{10,11}', data['member']):
-                login_name=""
-                login_phone_number=data['member']
-            else:
-                login_name=""
-                login_phone_number=""
-
-            if not (Member.objects.filter(Q(name=login_name) | Q(phone_number=login_phone_number)).exists() and
-                    bcrypt.checkpw(data['password'].encode('utf-8'), Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).password.encode('utf-8'))):
-                return JsonResponse({"message": "INVALID_MEMBER"}, status=401)
-            
-            token = jwt.encode({'id': Member.objects.get(Q(name=login_name) | Q(phone_number=login_phone_number)).id}, SECRET_KEY, algorithm='HS256')
-
-            return JsonResponse({"message": "SUCCESS", "token": token}, status=200)
-        except Exception:
-            return JsonResponse({"mesage": "INVALID_VALUE"}, status=400)

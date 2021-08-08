@@ -14,8 +14,6 @@ def login_decorator(func):
 
         except jwt.exceptions.DecodeError:
             return JsonResponse({"message": "INVALID_TOKEN"}, status=400)
-        except Exception:
-            return JsonResponse({"message": "INVALID_AUTHORIZATION"}, status=400)
 
         return func(self, request, *args, **kwargs)
     return wrapper

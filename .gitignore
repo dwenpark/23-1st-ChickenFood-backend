@@ -369,6 +369,7 @@ my_settings.py
 brand.csv
 type.csv
 product.csv
+option.csv
 
 # dbuplodaer
 db_uploader.py

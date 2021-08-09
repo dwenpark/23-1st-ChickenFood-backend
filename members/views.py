@@ -50,7 +50,7 @@ class SignInView(View):
         data = json.loads(request.body)
 
         if not (data.get('member') and data.get('password')):
-            return JsonResponse({"message": "EMPTY_VALUE"}, status=40)
+            return JsonResponse({"message": "EMPTY_VALUE"}, status=401)
 
         member = data['member'].replace("-", "")
  

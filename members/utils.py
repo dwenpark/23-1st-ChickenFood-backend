@@ -4,7 +4,7 @@ import requests
 
 from django.http import JsonResponse
 
-from chickfood.settings import SECRET_KEY
+from chickenfood.settings import SECRET_KEY
 from members.models     import Member
 
 def login_decorator(func):

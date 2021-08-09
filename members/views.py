@@ -24,7 +24,7 @@ class SignUpView(View):
                     re.match('\S{8,}', data['password']) and
                     re.match('\d{10,11}', data['phone_number'])):
             return JsonResponse({"message": "INVALID_FORMAT"}, status=400)
-            
+ 
         if data.get('recommender'):
             if not Member.objects.filter(name=data['recommender']).exists():
                 return JsonResponse({"message": "INVALID_RECOMMENDER"}, status=400)
@@ -50,10 +50,10 @@ class SignInView(View):
         data = json.loads(request.body)
 
         if not (data.get('member') and data.get('password')):
-            return JsonResponse({"message": "EMPTY_VALUE"}, status=400)
-            
+            return JsonResponse({"message": "EMPTY_VALUE"}, status=40)
+
         member = data['member'].replace("-", "")
-            
+ 
         q = Q(name=member) | Q(phone_number=member)
 
         if not Member.objects.filter(q).exists():
@@ -61,7 +61,7 @@ class SignInView(View):
 
         if not bcrypt.checkpw(data['password'].encode('utf-8'), Member.objects.get(q).password.encode('utf-8')):
             return JsonResponse({"message": "INVALID_MEMBER"}, status=401)
-            
+ 
         token = jwt.encode({'id': Member.objects.get(q).id}, SECRET_KEY, algorithm='HS256')
 
         return JsonResponse({"message": "SUCCESS", "token": token}, status=200)

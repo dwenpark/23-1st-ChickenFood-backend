@@ -364,3 +364,12 @@ my_settings.py
 
 # idea folder
 .idea/
+
+# csv
+brand.csv
+type.csv
+product.csv
+option.csv
+
+# dbuplodaer
+db_uploader.py

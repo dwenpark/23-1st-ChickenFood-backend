@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls     import path, include
 
-from products.views  import BrandsView, TypesView
+from products.views  import BrandsView, TypesView, OptionView
 
 urlpatterns = [
     path('products', include('products.urls')),
@@ -24,5 +24,6 @@ urlpatterns = [
     path('inventorys', include('inventorys.urls')),
     path('coupons', include('coupons.urls')),
     path('types', TypesView.as_view()),
-    path('brands', BrandsView.as_view())
+    path('brands', BrandsView.as_view()),
+    path('options', OptionView.as_view()),
 ]

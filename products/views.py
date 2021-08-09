@@ -1,9 +1,9 @@
 from django.views           import View
 from django.http            import JsonResponse
 from django.db.models       import Q
-from django.core.exceptions import FieldError
+from django.core.exceptions import FieldError, ObjectDoesNotExist
 
-from .models          import Brand, Type, Product
+from .models                import Brand, Type, Product, Option
 
 class BrandsView(View):
     def get(self, request):
@@ -61,3 +61,33 @@ class ProductsView(View):
 
         except FieldError:
             return JsonResponse({"RESULT" : "FILTER_ERROR"}, status=404)
+
+class ProductDetailView(View):
+    def get(self, request, product_id):
+        try:
+            product = Product.objects.get(id=product_id)
+
+            item = [{
+                "id"           : product.id,
+                "name"         : product.name,
+                "price"        : product.price,
+                "thumbnail"    : product.thumbnail,
+                "brand"        : product.brand.name,
+                "type"         : product.type.name,
+                "detail_image" : product.detail_image,
+                "element"      : product.element,
+                "weight"       : product.weight
+            }]
+            return JsonResponse({"item" : item}, status=200)
+
+        except ObjectDoesNotExist:
+            return JsonResponse({"ERROR": "DOES_NOT_EXIST"}, status=400)
+
+class OptionView(View):
+    def get(self, request):
+        options = [{
+            "id"   : option.id,
+            "name" : option.name
+        } for option in Option.objects.all()]
+
+        return JsonResponse({"options" : options}, status=200)

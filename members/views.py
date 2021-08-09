@@ -70,6 +70,8 @@ class MemberCheckView(View):
     def get(self, request):
         if not data.get('name'):
             return JsonResponse({"message": "KEY_ERROR"}, status=400)
+        
         if Member.objects.filter(id=data.get('name')).exists():
             return JsonResponse({"message": "EXIST_MEMBER"}, status=400)
+
         return JsonResponse({"message": "SUCCESS"}, status=200)

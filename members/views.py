@@ -15,7 +15,7 @@ class SignUpView(View):
         data = json.loads(request.body)
             
         if not (data.get('name') and data.get('email') and data.get('password') and data.get('phone_number')):
-            return JsonResponse({"message": "EMPTY_VALUE"}, status=400)
+            return JsonResponse({"message": "KEY_ERROR"}, status=400)
             
         data['phone_number'] = data['phone_number'].replace("-", "")
 
@@ -50,7 +50,7 @@ class SignInView(View):
         data = json.loads(request.body)
 
         if not (data.get('member') and data.get('password')):
-            return JsonResponse({"message": "EMPTY_VALUE"}, status=401)
+            return JsonResponse({"message": "KEY_ERROR"}, status=401)
 
         member = data['member'].replace("-", "")
  

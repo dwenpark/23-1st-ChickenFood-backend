@@ -62,28 +62,30 @@ class ProductsView(View):
         except FieldError:
             return JsonResponse({"RESULT" : "FILTER_ERROR"}, status=404)
 
-class ProductDetailView(View):
+class ProductView(View):
     def get(self, request, product_id):
-        try:
-            product = Product.objects.get(id=product_id)
+        if not product_id.isdigit():
+            return JsonResponse({"ERROR": "NEED_NUMBER"}, status=400)
 
-            item = [{
-                "id"           : product.id,
-                "name"         : product.name,
-                "price"        : product.price,
-                "thumbnail"    : product.thumbnail,
-                "brand"        : product.brand.name,
-                "type"         : product.type.name,
-                "detail_image" : product.detail_image,
-                "element"      : product.element,
-                "weight"       : product.weight
-            }]
-            return JsonResponse({"item" : item}, status=200)
-
-        except ObjectDoesNotExist:
+        if not Product.objects.filter(id=product_id).exists():
             return JsonResponse({"ERROR": "DOES_NOT_EXIST"}, status=400)
 
-class OptionView(View):
+        product = Product.objects.get(id=product_id)
+
+        item = [{
+            "id"           : product.id,
+            "name"         : product.name,
+            "price"        : product.price,
+            "thumbnail"    : product.thumbnail,
+            "brand"        : product.brand.name,
+            "type"         : product.type.name,
+            "detail_image" : product.detail_image,
+            "element"      : product.element,
+            "weight"       : product.weight
+        }]
+        return JsonResponse({"item" : item}, status=200)
+
+class OptionsView(View):
     def get(self, request):
         options = [{
             "id"   : option.id,

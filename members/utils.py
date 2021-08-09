@@ -10,7 +10,7 @@ def login_decorator(func):
             token          = request.headers.get('Authorization')
             payload        = jwt.decode(token, SECRET_KEY, algorithms='HS256')
 
-            if Member.objects.filter(id=payload.get('id')):
+            if not Member.objects.filter(id=payload.get('id')).exists():
                 return JsonResponse({"message": "INVALID_MEMBER"}, status=400)
  
             member         = Member.objects.get(id=payload['id'])

@@ -11,44 +11,46 @@ from chickenfood.settings import SECRET_KEY
 from members.models       import Member
 from products.models      import Product, Option
 from inventorys.models    import Inventory
+from members.utils        import login_decorator
 
 class InventorysView(View):
     @login_decorator
     def post(self, request):
         data = json.loads(request.body)
-        member = request.member
+        member = request.member.id
+        
+        if not (data.get('product_id') and data.get('quantity')):
+            return JsonResponse({"message": "KEY_ERROR"}, status=400)
 
-        print(member)
+        if not (re.match('^\d+$', str(data['product_id'])) and Product.objects.filter(id=data['product_id']).exists()):
+            return JsonResponse({"message": "INVALID_VALUE"}, status=400)
 
-        product = Product.objects.get(id=data['product_id'])
-           
-        if Option.objects.filter(id=data.get('option_id')).exists():
-            option = Option.objects.get(id=data['option_id'])
+        product = Product.objects.get(id=data['product_id']).id
+
+        if not re.match('^\d+$', str(data['quantity'])):
+            return JsonResponse({"message": "INVALID_VALUE"}, status=400)
+
+        if re.match('^\d+$', str(data['option_id'])) and Option.objects.filter(id=data.get('option_id')).exists():
+            option = Option.objects.get(id=data['option_id']).id
         else:
             option = None
 
-        items = Inventory.objects.filter(
-                    member_id=member,
-                    product_id=product,
-                    option_id=option
-                )
-            
         if Inventory.objects.filter(member_id=member, product_id=product, option_id=option).exists():
             item = Inventory.objects.get(
                         member_id=member,
                         product_id=product,
-                        option_id=option_id
+                        option_id=option
                    )
             item.quantity += int(data['quantity'])
             item.save()
 
-        return JsonResponse({"message": "SUCCESS"}, status=201)
+            return JsonResponse({"message": "SUCCESS"}, status=201)
             
         Inventory.objects.create(
-                member_id=member.id,
-                product_id=data['product_id'],
+                member_id=member,
+                product_id=product,
                 quantity=data['quantity'],
-                option_id=data.get('option_id')
+                option_id=option
         )
 
         return JsonResponse({"message": "SUCCESS"}, status=201)

@@ -14,14 +14,14 @@ class SignUpView(View):
     def post(self, request):
         data = json.loads(request.body)
             
-        if not (data.get('name') or data.get('email') or data.get('password') or data.get('phone_number')):
+        if not (data.get('name') and data.get('email') and data.get('password') and data.get('phone_number')):
             return JsonResponse({"message": "EMPTY_VALUE"}, status=400)
             
         data['phone_number'] = data['phone_number'].replace("-", "")
 
-        if not (re.match('^(?=.*[a-zA-Z]+).{1,}$', data['name']) or
-                    re.match('^\w+@\w+\.\w+$', data['email']) or
-                    re.match('\S{8,}', data['password']) or
+        if not (re.match('^(?=.*[a-zA-Z]+).{1,}$', data['name']) and
+                    re.match('^\w+@\w+\.\w+$', data['email']) and
+                    re.match('\S{8,}', data['password']) and
                     re.match('\d{10,11}', data['phone_number'])):
             return JsonResponse({"message": "INVALID_FORMAT"}, status=400)
             
@@ -49,7 +49,7 @@ class SignInView(View):
     def post(self, request):
         data = json.loads(request.body)
 
-        if not (data.get('member') or data.get('password')):
+        if not (data.get('member') and data.get('password')):
             return JsonResponse({"message": "EMPTY_VALUE"}, status=400)
             
         member = data['member'].replace("-", "")

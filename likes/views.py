@@ -1,6 +1,5 @@
 from django.views     import View
 from django.http      import JsonResponse
-from django.db.models import F
 
 from products.models  import Product
 from members.utils    import login_decorator
@@ -31,7 +30,7 @@ class LikesView(View):
         Like.objects.create(member_id=request.member.id, product_id=product_id)
 
         product = Product.objects.get(id=product_id)
-        product.like_number = F("like_number") + 1
+        product.like_number += 1
         product.save()
         return JsonResponse({"Result": "LIKED"}, status=200)
 
@@ -49,6 +48,6 @@ class LikesView(View):
         Like.objects.filter(member_id=request.member, product_id=product_id).delete()
 
         product = Product.objects.get(id=product_id)
-        product.like_number = F("like_number") - 1
+        product.like_number -= 1
         product.save()
         return JsonResponse({"Result": "UNLIKED"}, status=200)

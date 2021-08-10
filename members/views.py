@@ -70,10 +70,9 @@ class SignInView(View):
         return JsonResponse({"message": "SUCCESS", "token": token}, status=200)
 
 class MemberCheckView(View):
-    def get(self, request):
-
+    def post(self, request):
         data = json.loads(request.body)
-
+        
         if not data.get('name'):
             return JsonResponse({"message": "KEY_ERROR"}, status=400)
         

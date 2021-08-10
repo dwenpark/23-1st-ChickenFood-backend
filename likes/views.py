@@ -19,6 +19,12 @@ class LikesView(View):
 
     @login_decorator
     def post(self, request, product_id):
+        if not product_id.isdigit():
+            return JsonResponse({"ERROR": "NEED_NUMBER"}, status=400)
+
+        if not Product.objects.filter(id=product_id).exists():
+            return JsonResponse({"ERROR": "PRODUCT_NOT_EXIST"}, status=400)
+
         if Like.objects.filter(member_id=request.member, product_id=product_id).exists():
             return JsonResponse({"ERROR": "ALREADY_LIKED"}, status=400)
 
@@ -31,6 +37,12 @@ class LikesView(View):
 
     @login_decorator
     def delete(self, request, product_id):
+        if not product_id.isdigit():
+            return JsonResponse({"ERROR": "NEED_NUMBER"}, status=400)
+
+        if not Product.objects.filter(id=product_id).exists():
+            return JsonResponse({"ERROR": "PRODUCT_NOT_EXIST"}, status=400)
+
         if not Like.objects.filter(member_id=request.member, product_id=product_id).exists():
             return JsonResponse({"ERROR": "DID_NOT_LIKED"}, status=400)
 

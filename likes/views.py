@@ -9,13 +9,13 @@ from .models          import Like
 class LikesView(View):
     @login_decorator
     def get(self,request):
-        results = [{
+        items = [{
             "name"      : like.product.name,
             "price"     : like.product.price,
             "thumbnail" : like.product.thumbnail
         } for like in Like.objects.filter(member_id=request.member)]
 
-        return JsonResponse({"Result": results}, status=200)
+        return JsonResponse({"ITEMS": items}, status=200)
 
     @login_decorator
     def post(self, request, product_id):

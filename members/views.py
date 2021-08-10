@@ -65,3 +65,13 @@ class SignInView(View):
         token = jwt.encode({'id': Member.objects.get(q).id}, SECRET_KEY, algorithm='HS256')
 
         return JsonResponse({"message": "SUCCESS", "token": token}, status=200)
+
+class MemberCheckView(View):
+    def get(self, request):
+        if not data.get('name'):
+            return JsonResponse({"message": "KEY_ERROR"}, status=400)
+        
+        if Member.objects.filter(id=data.get('name')).exists():
+            return JsonResponse({"message": "EXIST_MEMBER"}, status=400)
+
+        return JsonResponse({"message": "SUCCESS"}, status=200)

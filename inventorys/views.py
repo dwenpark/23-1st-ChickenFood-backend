@@ -18,19 +18,16 @@ class InventorysView(View):
     def post(self, request):
         data = json.loads(request.body)
         member = request.member.id
-        
+ 
         if not (data.get('product_id') and data.get('quantity')):
             return JsonResponse({"message": "KEY_ERROR"}, status=400)
 
-        if not (re.match('^\d+$', str(data['product_id'])) and Product.objects.filter(id=data['product_id']).exists()):
+        if not Product.objects.filter(id=data['product_id']).exists():
             return JsonResponse({"message": "INVALID_VALUE"}, status=400)
 
         product = Product.objects.get(id=data['product_id']).id
 
-        if not re.match('^\d+$', str(data['quantity'])):
-            return JsonResponse({"message": "INVALID_VALUE"}, status=400)
-
-        if re.match('^\d+$', str(data['option_id'])) and Option.objects.filter(id=data.get('option_id')).exists():
+        if Option.objects.filter(id=data.get('option_id')).exists():
             option = Option.objects.get(id=data['option_id']).id
         else:
             option = None
@@ -45,7 +42,7 @@ class InventorysView(View):
             item.save()
 
             return JsonResponse({"message": "SUCCESS"}, status=201)
-            
+ 
         Inventory.objects.create(
                 member_id=member,
                 product_id=product,
@@ -54,36 +51,3 @@ class InventorysView(View):
         )
 
         return JsonResponse({"message": "SUCCESS"}, status=201)
-
-    @login_decorator
-    def get(self, request):
-            member = request.member.id
-
-            inventorys = Inventory.objects.filter(member_id=member)
-
-            items = []
-            for inventory in inventorys:
-                product = Product.objects.get(id=inventory.product_id)
-                if inventory.option_id and Option.objects.filter(id=inventory.option_id).exists:
-                    option = Option.objects.get(id=inventory.option_id).name
-                else:
-                    option = None
-
-                item = {
-                    "id" : inventory.id,
-                    "name" : product.name,
-                    "price" : product.price,
-                    "thumbnail" : product.thumbnail,
-                    "quantity" : inventory.quantity,
-                    "option" : option
-                }
-
-                items.append(item)
-                
-            return JsonResponse({"items": items}, status=200)
-
-
-
-
-
-

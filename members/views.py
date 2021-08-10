@@ -26,8 +26,11 @@ class SignUpView(View):
             return JsonResponse({"message": "INVALID_FORMAT"}, status=400)
  
         if data.get('recommender'):
-            if not Member.objects.filter(name=data['recommender']).exists():
+            if not Member.objects.filter(name=data.get('recommender')).exists():
                 return JsonResponse({"message": "INVALID_RECOMMENDER"}, status=400)
+            recommender = Member.objects.get(name=data.get('recommender'))
+        else:
+            recommender = None
 
         q = Q(name=data['name']) | Q(email=data['email']) | Q(phone_number=data['phone_number'])
 
@@ -40,7 +43,7 @@ class SignUpView(View):
                 password     = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
                 phone_number = data['phone_number'],
                 address      = data.get('address'),
-                recommender  = Member.objects.get(name=data['recommender'])
+                recommender  = recommender
         )
 
         return JsonResponse({"message": "SUCCESS"}, status=201)

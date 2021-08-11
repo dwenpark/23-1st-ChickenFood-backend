@@ -85,12 +85,12 @@ class MemberCheckView(View):
 class MemberView(View):
     @login_decorator
     def get(self, request):
-        info = {
-            "id"    : request.member.id,
-            "name"  : request.member.name,
-            "email" : request.member.email,
-            "phone_number" : request.member.phone_number,
-            "address" : request.member.address,
+        information = {
+            "id"             : request.member.id,
+            "name"           : request.member.name,
+            "email"          : request.member.email,
+            "phone_number"   : request.member.phone_number,
+            "address"        : request.member.address,
             "recommender_id" : request.member.recommender
         }
-        return JsonResponse({"INFO": info}, status=200)
+        return JsonResponse({"result": information}, status=200)

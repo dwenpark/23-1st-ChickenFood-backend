@@ -9,6 +9,7 @@ class LikesView(View):
     @login_decorator
     def get(self,request):
         items = [{
+            "id"        : like.product.id,
             "name"      : like.product.name,
             "price"     : like.product.price,
             "thumbnail" : like.product.thumbnail

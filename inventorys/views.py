@@ -50,11 +50,14 @@ class InventorysView(View):
 
             items = [{
                 "id" : inventory.id,
-                "name" : inventory.product.name,
-                "price" : inventory.product.price,
-                "thumbnail" : inventory.product.thumbnail,
-                "quantity" : inventory.quantity,
-                "option" : inventory.option.name if inventory.option else None
+                "name": inventory.product.name,
+                "price": inventory.product.price,
+                "thumbnail": inventory.product.thumbnail,
+                "quantity": inventory.quantity,
+                "option": {
+                    "id": inventory.option.id if inventory.option else None,
+                    "name": inventory.option.name if inventory.option else None
+                }
             } for inventory in inventorys]
 
             return JsonResponse({"items": items}, status=200)

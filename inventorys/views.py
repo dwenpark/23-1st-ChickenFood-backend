@@ -25,6 +25,9 @@ class InventorysView(View):
         if not Product.objects.filter(id=data['product_id']).exists():
             return JsonResponse({"message": "INVALID_VALUE"}, status=400)
 
+        if data['quantity'] < 1:
+            return JsonResponse({"message": "INVALID_VALUE"}, status=400)
+
         product = Product.objects.get(id=data['product_id']).id
         option  = data.get('option_id')
 
@@ -36,7 +39,7 @@ class InventorysView(View):
                             product_id = product,
                             option_id = option
                         )
-        item.quantity += int(data['quantity'])
+        item.quantity += data['quantity']
         item.save()
 
         return JsonResponse({"message": "SUCCESS"}, status=201)

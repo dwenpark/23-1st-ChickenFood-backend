@@ -18,7 +18,7 @@ class InventorysView(View):
     def post(self, request):
         data   = json.loads(request.body)
         member = request.member.id
- 
+
         if not (data.get('product_id') and data.get('quantity')):
             return JsonResponse({"message": "KEY_ERROR"}, status=400)
 
@@ -31,22 +31,12 @@ class InventorysView(View):
         if not Option.objects.filter(id=option).exists():
             option = None
 
-        if Inventory.objects.filter(member_id=member, product_id=product, option_id=option).exists():
-            item = Inventory.objects.get(
-                        member_id=member,
-                        product_id=product,
-                        option_id=option
-                   )
-            item.quantity += int(data['quantity'])
-            item.save()
-
-            return JsonResponse({"message": "SUCCESS"}, status=201)
- 
-        Inventory.objects.create(
-                member_id=member,
-                product_id=product,
-                quantity=data['quantity'],
-                option_id=option
-        )
+        item, created = Inventory.objects.get_or_create(
+                            member_id = member,
+                            product_id = product,
+                            option_id = option
+                        )
+        item.quantity += int(data['quantity'])
+        item.save()
 
         return JsonResponse({"message": "SUCCESS"}, status=201)

@@ -43,3 +43,18 @@ class InventorysView(View):
         item.save()
 
         return JsonResponse({"message": "SUCCESS"}, status=201)
+
+    @login_decorator
+    def get(self, request):
+            inventorys = Inventory.objects.filter(member_id=request.member.id)
+
+            items = [{
+                "id" : inventory.id,
+                "name" : inventory.product.name,
+                "price" : inventory.product.price,
+                "thumbnail" : inventory.product.thumbnail,
+                "quantity" : inventory.quantity,
+                "option" : inventory.option.name if inventory.option else None
+            } for inventory in inventorys]
+
+            return JsonResponse({"items": items}, status=200)

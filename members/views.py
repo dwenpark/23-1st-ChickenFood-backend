@@ -82,8 +82,15 @@ class MemberCheckView(View):
 
         return JsonResponse({"message": "SUCCESS"}, status=200)
 
-class MyPageView(View):
+class MemberView(View):
     @login_decorator
-    def get(selfs, request):
-        name = request.member.name
-        return JsonResponse({"NAME": name}, status=200)
+    def get(self, request):
+        info = {
+            "id"    : request.member.id,
+            "name"  : request.member.name,
+            "email" : request.member.email,
+            "phone_number" : request.member.phone_number,
+            "address" : request.member.address,
+            "recommender_id" : request.member.recommender
+        }
+        return JsonResponse({"INFO": info}, status=200)

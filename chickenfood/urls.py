@@ -16,7 +16,6 @@ Including another URLconf
 from django.urls     import path, include
 
 from products.views  import BrandsView, TypesView, OptionsView
-from members.views   import MyPageView
 
 urlpatterns = [
     path('products', include('products.urls')),
@@ -26,6 +25,5 @@ urlpatterns = [
     path('coupons', include('coupons.urls')),
     path('types', TypesView.as_view()),
     path('brands', BrandsView.as_view()),
-    path('options', OptionsView.as_view()),
-    path("mypage", MyPageView.as_view())
+    path('options', OptionsView.as_view())
 ]

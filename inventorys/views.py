@@ -16,7 +16,7 @@ from members.utils        import login_decorator
 class InventorysView(View):
     @login_decorator
     def post(self, request):
-        data = json.loads(request.body)
+        data   = json.loads(request.body)
         member = request.member.id
  
         if not (data.get('product_id') and data.get('quantity')):
@@ -26,10 +26,9 @@ class InventorysView(View):
             return JsonResponse({"message": "INVALID_VALUE"}, status=400)
 
         product = Product.objects.get(id=data['product_id']).id
+        option  = data.get('option_id')
 
-        if Option.objects.filter(id=data.get('option_id')).exists():
-            option = Option.objects.get(id=data['option_id']).id
-        else:
+        if not Option.objects.filter(id=option).exists():
             option = None
 
         if Inventory.objects.filter(member_id=member, product_id=product, option_id=option).exists():

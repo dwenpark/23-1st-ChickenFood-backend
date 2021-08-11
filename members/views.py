@@ -9,6 +9,7 @@ from django.db.models import Q
 
 from chickenfood.settings import SECRET_KEY
 from members.models       import Member
+from members.utils        import login_decorator
 
 class SignUpView(View):
     def post(self, request):
@@ -80,3 +81,9 @@ class MemberCheckView(View):
             return JsonResponse({"message": "EXIST_MEMBER"}, status=400)
 
         return JsonResponse({"message": "SUCCESS"}, status=200)
+
+class MyPageView(View):
+    @login_decorator
+    def get(selfs, request):
+        name = request.member.name
+        return JsonResponse({"NAME": name}, status=200)

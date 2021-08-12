@@ -85,17 +85,16 @@ class ProductView(View):
             "element"      : product.element,
             "weight"       : product.weight
         }]
-        if not request.headers.get('Authorization'):
-            return JsonResponse({"item" : item , "liked" : False}, status=200)
 
         if request.headers.get('Authorization'):
             return JsonResponse({"item": item, "liked": PrivateView.get(self, request, product_id)}, status=200)
 
+        return JsonResponse({"item": item, "liked": False}, status=200)
+
 class PrivateView(View):
     @login_decorator
     def get(self, request, product_id):
-        liked = Like.objects.filter(member_id = request.member.id, product_id = product_id).exists()
-        return liked
+        return Like.objects.filter(member_id = request.member.id, product_id = product_id).exists()
 
 class OptionsView(View):
     def get(self, request):

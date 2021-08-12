@@ -25,5 +25,5 @@ urlpatterns = [
     path('coupons', include('coupons.urls')),
     path('types', TypesView.as_view()),
     path('brands', BrandsView.as_view()),
-    path('options', OptionsView.as_view()),
+    path('options', OptionsView.as_view())
 ]

@@ -75,7 +75,7 @@ class InventorysView(View):
 
         items = Inventory.objects.filter(q)
 
-        if items.count() == 0 or len(inventorys) != items.count():
+        if len(inventorys) != items.count():
             return JsonResponse({"message": "DELETE_FAIL"}, status=400)
 
         items.delete()

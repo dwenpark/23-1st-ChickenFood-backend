@@ -85,6 +85,6 @@ class InventorysView(View):
             item.update(quantity = data['quantity'])
 
         if data.get('option'):
-            itemupdate(option_id = data['option'])
+            item.update(option_id = data['option'])
 
         return JsonResponse({"message": "SUCCESS"}, status=200)

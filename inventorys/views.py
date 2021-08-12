@@ -74,3 +74,17 @@ class InventorysView(View):
         items.delete()
 
         return JsonResponse({"message": "SUCCESS"}, status=204)
+
+    @login_decorator
+    def patch(self, request):
+        data = json.loads(request.body)
+ 
+        item = Inventory.objects.filter(id=request.GET.get('id'), memeber_id=request.member.id)
+
+        if data.get('quantity'):
+            item.update(quantity = data['quantity'])
+
+        if data.get('option'):
+            itemupdate(option_id = data['option'])
+
+        return JsonResponse({"message": "SUCCESS"}, status=200)

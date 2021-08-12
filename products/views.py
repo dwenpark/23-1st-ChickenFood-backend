@@ -110,7 +110,7 @@ class ProductPrivateView(View):
             "detail_image": product.detail_image,
             "element"     : product.element,
             "weight"      : product.weight,
-            "liked"       : Like.objects.filter(member_id = request.member.id, product_id = product_id).exists()
+            "liked"       : product.like_set.filter(member_id=request.member.id).exists()
         }]
 
         return JsonResponse({"item": item}, status=200)

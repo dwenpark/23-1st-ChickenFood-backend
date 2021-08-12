@@ -4,6 +4,8 @@ from django.db.models       import Q
 from django.core.exceptions import FieldError, ObjectDoesNotExist
 
 from .models                import Brand, Type, Product, Option
+from likes.models           import Like
+from members.utils          import login_decorator
 
 class BrandsView(View):
     def get(self, request):
@@ -83,7 +85,17 @@ class ProductView(View):
             "element"      : product.element,
             "weight"       : product.weight
         }]
-        return JsonResponse({"item" : item}, status=200)
+        if not request.headers.get('Authorization'):
+            return JsonResponse({"item" : item , "liked" : False}, status=200)
+
+        if request.headers.get('Authorization'):
+            return JsonResponse({"item": item, "liked": PrivateView.get(self, request, product_id)}, status=200)
+
+class PrivateView(View):
+    @login_decorator
+    def get(self, request, product_id):
+        liked = Like.objects.filter(member_id = request.member.id, product_id = product_id).exists()
+        return liked
 
 class OptionsView(View):
     def get(self, request):

@@ -79,12 +79,36 @@ class InventorysView(View):
     def patch(self, request):
         data = json.loads(request.body)
 
-        item = Inventory.objects.filter(id=request.GET.get('id'), member_id=request.member.id)
+#        item = Inventory.objects.filter(id=request.GET.get('id'), member_id=request.member.id)
+#
+#        if data.get('quantity') and data.get('option'):
+#            item.update(quantity = data['quantity'], option_id = data['option'])
+#            return JsonResponse({"message": "SUCCESS"}, status=200)
+#
+#        if data.get('quantity'):
+#            item.update(quantity = data['quantity'])
+#
+#        if data.get('option'):
+#            item.update(option_id = data['option'])
+#
+#        return JsonResponse({"message": "SUCCESS"}, status=200)
+
+
+
+
+
+        item = Inventory.objects.filter(id=request.GET.get('id'), memeber_id=request.member.id)
 
         if data.get('quantity'):
-            item.update(quantity = data['quantity'])
+            item.quantity = data['quantity']
 
         if data.get('option'):
-            item.update(option_id = data['option'])
+            item.option_id = data['option']
+
+        item.save()
 
         return JsonResponse({"message": "SUCCESS"}, status=200)
+
+
+
+

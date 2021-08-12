@@ -61,3 +61,23 @@ class InventorysView(View):
         } for inventory in inventorys]
 
         return JsonResponse({"items": items}, status=200)
+
+    @login_decorator
+    def delete(self, request):
+        inventorys = request.GET.getlist('id')
+
+        q = Q(member_id=request.member.id)
+
+        if inventorys:
+            q = Q()
+            for inventory in inventorys:
+                q |= Q(id=inventory) & Q(member_id=request.member.id)
+
+        items = Inventory.objects.filter(q)
+
+        if items.count() == 0 or len(inventorys) != items.count():
+            return JsonResponse({"message": "DELETE_FAIL"}, status=400)
+
+        items.delete()
+
+        return JsonResponse({"message": "SUCCESS"}, status=201)

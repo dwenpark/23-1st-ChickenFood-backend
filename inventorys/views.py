@@ -73,4 +73,4 @@ class InventorysView(View):
 
         items.delete()
 
-        return JsonResponse({"message": "SUCCESS"}, status=201)
+        return JsonResponse({"message": "SUCCESS"}, status=204)

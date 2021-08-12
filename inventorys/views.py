@@ -66,14 +66,10 @@ class InventorysView(View):
     def delete(self, request):
         inventorys = request.GET.getlist('id')
 
-        q = Q(member_id=request.member.id)
+        items = Inventory.objects.filter(member_id=request.member.id)
 
         if inventorys:
-            q = Q()
-            for inventory in inventorys:
-                q |= Q(id=inventory) & Q(member_id=request.member.id)
-
-        items = Inventory.objects.filter(q)
+            items = Inventory.objects.filter(id__in=inventorys, member_id=request.member.id)
 
         items.delete()
 

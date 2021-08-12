@@ -61,3 +61,16 @@ class InventorysView(View):
         } for inventory in inventorys]
 
         return JsonResponse({"items": items}, status=200)
+
+    @login_decorator
+    def delete(self, request):
+        inventorys = request.GET.getlist('id')
+
+        items = Inventory.objects.filter(member_id=request.member.id)
+
+        if inventorys:
+            items = Inventory.objects.filter(id__in=inventorys, member_id=request.member.id)
+
+        items.delete()
+
+        return JsonResponse({"message": "SUCCESS"}, status=204)

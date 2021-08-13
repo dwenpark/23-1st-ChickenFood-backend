@@ -25,16 +25,17 @@
 
 ## 구현 페이지
 
-### 메인
-![](https://i.ibb.co/hF18zVz/image.gif)
+### 메인/상품
+![](https://i.ibb.co/b7Zz4Zc/2.gif)
 ![](https://i.ibb.co/zxs3VJy/image.gif)
-
-### 상품
+![](https://i.ibb.co/JKqMtx9/image.gif)
 
 ### 로그인/회원가입
+![](https://i.ibb.co/VSfcNNf/image.gif)
+![](https://i.ibb.co/HHmS9zw/image.gif)
 
 ### 장바구니/찜하기
-
+![](https://i.ibb.co/bv9BGq9/image.gif)
 
 ## **구현기능💻**
 

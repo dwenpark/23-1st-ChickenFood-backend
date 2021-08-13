@@ -79,7 +79,7 @@ class InventorysView(View):
     def patch(self, request):
         data = json.loads(request.body)
  
-        item = Inventory.objects.filter(id=request.GET.get('id'), memeber_id=request.member.id)
+        item = Inventory.objects.filter(id=request.GET.get('id'), member_id=request.member.id)
 
         if data.get('quantity'):
             item.update(quantity = data['quantity'])

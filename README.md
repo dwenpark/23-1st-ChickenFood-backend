@@ -25,6 +25,8 @@
 
 ## 구현 페이지
 
+### [시연 영상](https://www.youtube.com/watch?v=mMQE_7ZBouc)
+
 ### 메인/상품
 ![](https://i.ibb.co/b7Zz4Zc/2.gif)
 ![](https://i.ibb.co/zxs3VJy/image.gif)
